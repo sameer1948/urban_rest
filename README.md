@@ -1,16 +1,24 @@
-# urban_rest
+📱 App Description (for Play Store / App Store)
+Name: Urban Test
 
-A new Flutter project.
+Short Description:
 
-## Getting Started
+Discover, manage, and evaluate urban dormitory living — all in one app.
 
-This project is a starting point for a Flutter application.
+Full Description:
 
-A few resources to get you started if this is your first Flutter project:
+Urban Test is your smart companion for navigating life in shared dormitories and urban housing. Whether you're a student, a city dweller, or managing a dormitory, Urban Test helps you connect, evaluate, and enhance your living experience.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+🔹 Features:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+📍 Explore dormitory options in your city
+
+📝 Take lifestyle assessments to match your preferences
+
+🛏️ Roommate compatibility test
+
+📊 Rate & review dorms anonymously
+
+📬 Community message boards & alerts
+
+Urban Test helps make city living smoother, smarter, and more social.
