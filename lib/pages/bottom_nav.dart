@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:urban_rest/pages/bed_page.dart';
+import 'package:urban_rest/pages/settings_page.dart';
 
 class BottomNav extends StatefulWidget {
   const BottomNav({Key? key}) : super(key: key);
@@ -15,11 +17,11 @@ class _BottomNavState extends State<BottomNav> {
     // StatusPageNew(),
     // BillPage(),
     // SettingsPage(),
-    Center(child: Text("Home")),
+    BedPage(),
     Center(child: Text("Customers")),
     Center(child: Text("Status")),
     Center(child: Text("Bills")),
-    Center(child: Text("Settings")),
+    SettingsPage(),
   ];
 
   @override
