@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:urban_rest/pages/animation_page.dart';
+import 'package:urban_rest/pages/splash_screen/animation_page.dart';
 
 void main() {
   runApp(const MyApp());
