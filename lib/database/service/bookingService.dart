@@ -7,7 +7,7 @@ import 'package:urban_rest/model/booking.dart';
 
 class Bookingservice {
   /// Insert a new Booking record
-  Future<void> insertUsage(Booking booking) async {
+  Future<void> insertBooking(Booking booking) async {
     final db = await DatabaseHelper().database;
 
     await db.insert(
@@ -18,7 +18,7 @@ class Bookingservice {
   }
 
   /// Get all Bookings
-  Future<List<Booking>> getAllUsages() async {
+  Future<List<Booking>> getAllBookings() async {
     final db = await DatabaseHelper().database;
     final result = await db.query(DatabaseConstants.TABLE_BOOKING);
 
@@ -43,7 +43,7 @@ class Bookingservice {
   }
 
   /// Get current Booking for a bed
-  Future<Booking?> getCurrentUsageForBed(int bedId) async {
+  Future<Booking?> getCurrentBookingForBed(int bedId) async {
     final db = await DatabaseHelper().database;
     final now = DateTime.now().toIso8601String();
 
@@ -82,7 +82,7 @@ class Bookingservice {
   }
 
   /// Update Booking status
-  Future<void> updateUsageStatus(int id, String status) async {
+  Future<void> updateBookingStatus(int id, String status) async {
     final db = await DatabaseHelper().database;
     await db.update(
       DatabaseConstants.TABLE_BOOKING,

@@ -7,14 +7,19 @@ import 'package:urban_rest/model/bed.dart';
 
 class BedService {
   /// Insert a new bed
-  Future<void> insertBed(Bed bed) async {
-    final db = await DatabaseHelper().database;
+  Future<int> insertBed(Bed bed) async {
+    try {
+      final db = await DatabaseHelper().database;
 
-    await db.insert(
-      DatabaseConstants.TABLE_BED,
-      bed.toJson(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+      return await db.insert(
+        DatabaseConstants.TABLE_BED,
+        bed.toJson(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    } catch (e) {
+      print("Error inserting bed: $e");
+      return -1;
+    }
   }
 
   /// Fetch all beds
