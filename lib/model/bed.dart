@@ -1,7 +1,16 @@
 class Bed {
-  final int id;
-  bool isSelected;
-  bool isAvailable;
+  int id;
+  String status;
 
-  Bed({required this.id, this.isSelected = false, this.isAvailable = true});
+  Bed({required this.id, required this.status});
+
+  // Create Bed from JSON
+  factory Bed.fromJson(Map<String, dynamic> json) {
+    return Bed(id: json['id'] as int, status: json['status'] as String);
+  }
+
+  // Convert Bed to JSON
+  Map<String, dynamic> toJson() {
+    return {'id': id, 'status': status};
+  }
 }
