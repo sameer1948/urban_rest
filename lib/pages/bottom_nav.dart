@@ -1,6 +1,11 @@
+// ignore_for_file: library_private_types_in_public_api, use_super_parameters
+
 import 'package:flutter/material.dart';
 import 'package:urban_rest/pages/bed_page.dart';
+import 'package:urban_rest/pages/customer_page.dart';
 import 'package:urban_rest/pages/settings_page.dart';
+import 'package:urban_rest/pages/bill_page.dart';
+import 'package:urban_rest/pages/status_page.dart';
 
 class BottomNav extends StatefulWidget {
   const BottomNav({Key? key}) : super(key: key);
@@ -12,15 +17,10 @@ class BottomNav extends StatefulWidget {
 class _BottomNavState extends State<BottomNav> {
   int currentIndex = 0;
   List<Widget> pages = [
-    // ShowBeds(),
-    // CustomerPage(),
-    // StatusPageNew(),
-    // BillPage(),
-    // SettingsPage(),
     BedPage(),
-    Center(child: Text("Customers")),
-    Center(child: Text("Status")),
-    Center(child: Text("Bills")),
+    CustomerPage(),
+    StatusPage(),
+    BillPage(),
     SettingsPage(),
   ];
 

@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:urban_rest/constants/widgetConstants.dart';
 import 'package:urban_rest/pages/bottom_nav.dart';
-import 'package:urban_rest/widgets/colors_widget.dart';
+import 'package:urban_rest/widgets/common_widgets.dart';
 
 class AnimationPage extends StatefulWidget {
   const AnimationPage({super.key});
@@ -52,7 +52,7 @@ class _AnimationPageState extends State<AnimationPage> {
               SizedBox(height: 50),
               CircularProgressIndicator(
                 strokeWidth: 6,
-                color: ColorsWidget.generateRandomColor(),
+                color: CommonWidgets.generateRandomColor(),
               ),
             ],
           ),

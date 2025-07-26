@@ -11,7 +11,7 @@ class InvoiceService {
     final db = await DatabaseHelper().database;
 
     await db.insert(
-      DatabaseConstants.CREATE_TABLE_INVOICE,
+      DatabaseConstants.TABLE_INVOICE,
       invoice.toJson(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
@@ -20,7 +20,7 @@ class InvoiceService {
   /// Get all Invoices
   Future<List<Invoice>> getAllInvoices() async {
     final db = await DatabaseHelper().database;
-    final result = await db.query(DatabaseConstants.CREATE_TABLE_INVOICE);
+    final result = await db.query(DatabaseConstants.TABLE_INVOICE);
 
     return result.map((json) => Invoice.fromJson(json)).toList();
   }
@@ -29,7 +29,7 @@ class InvoiceService {
   Future<Invoice?> getInvoiceById(int id) async {
     final db = await DatabaseHelper().database;
     final result = await db.query(
-      DatabaseConstants.CREATE_TABLE_INVOICE,
+      DatabaseConstants.TABLE_INVOICE,
       where: 'id = ?',
       whereArgs: [id],
       limit: 1,
@@ -45,7 +45,7 @@ class InvoiceService {
   Future<void> deleteInvoice(int id) async {
     final db = await DatabaseHelper().database;
     await db.delete(
-      DatabaseConstants.CREATE_TABLE_INVOICE,
+      DatabaseConstants.TABLE_INVOICE,
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -55,7 +55,7 @@ class InvoiceService {
   Future<int> updateInvoice(Invoice invoice) async {
     final db = await DatabaseHelper().database;
     return await db.update(
-      DatabaseConstants.CREATE_TABLE_INVOICE,
+      DatabaseConstants.TABLE_INVOICE,
       invoice.toJson(),
       where: 'id = ?',
       whereArgs: [invoice.id],

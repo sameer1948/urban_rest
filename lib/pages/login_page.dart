@@ -17,14 +17,14 @@ class _LoginPageState extends State<LoginPage> {
       String password = _passwordController.text;
 
       // Simple hardcoded check for demonstration
-      if (username == 'admin' && password == '1234') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => HomePage()),
-        );
-      } else {
-        _showErrorDialog("Invalid username or password.");
-      }
+      // if (username == 'admin' && password == '1234') {
+      //   Navigator.pushReplacement(
+      //     context,
+      //     MaterialPageRoute(builder: (context) => HomePage()),
+      //   );
+      // } else {
+      //   _showErrorDialog("Invalid username or password.");
+      // }
     }
   }
 
