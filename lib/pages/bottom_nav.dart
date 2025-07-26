@@ -37,7 +37,7 @@ class _BottomNavState extends State<BottomNav> {
           });
         },
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.hotel), label: 'Beds'),
           BottomNavigationBarItem(
             icon: Icon(Icons.groups_3),
             label: 'Customers',

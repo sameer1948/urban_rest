@@ -52,9 +52,9 @@ class BedRateservice {
   }
 
   /// Update a BedRate
-  Future<void> updateBedRate(BedRate bedRate) async {
+  Future<int?> updateBedRate(BedRate bedRate) async {
     final db = await DatabaseHelper().database;
-    await db.update(
+    return await db.update(
       DatabaseConstants.TABLE_BED_RATE,
       bedRate.toJson(),
       where: 'id = ?',

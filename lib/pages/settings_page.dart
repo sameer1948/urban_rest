@@ -2,11 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:urban_rest/constants/databaseConstants.dart';
+import 'package:urban_rest/database/service/bedRateService.dart';
 import 'package:urban_rest/database/service/bedService.dart';
 import 'package:urban_rest/database/service/commonServices.dart';
 import 'package:urban_rest/model/bed.dart';
+import 'package:urban_rest/model/bedRate.dart';
 import 'package:urban_rest/model/bedStatus.dart';
-
 import 'package:urban_rest/widgets/snack_bar_widget.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -19,57 +20,205 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   final Commonservices _commonServices = Commonservices();
   final BedService _bedServices = BedService();
+  final BedRateservice _bedRateServices = BedRateservice();
 
   int totalBeds = 0;
+  double ratePerHour = 0.0;
+  final TextEditingController _rateController = TextEditingController();
+  final FocusNode _rateFocusNode = FocusNode();
+  bool isRateChanged = false;
 
   @override
   void initState() {
     super.initState();
     getCounts();
+    loadRatePerHour();
+
+    _rateFocusNode.addListener(() {
+      if (!_rateFocusNode.hasFocus) {
+        // Reset text field if value not saved when losing focus
+        final currentValue = double.tryParse(_rateController.text);
+        if (currentValue != null &&
+            currentValue.toStringAsFixed(2) != ratePerHour.toStringAsFixed(2)) {
+          setState(() {
+            _rateController.text = ratePerHour.toStringAsFixed(2);
+            isRateChanged = false;
+          });
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _rateFocusNode.dispose();
+    _rateController.dispose();
+    super.dispose();
   }
 
   void getCounts() async {
-    totalBeds = await _commonServices.getRowCount(DatabaseConstants.TABLE_BED);
+    int count = await _commonServices.getRowCount(DatabaseConstants.TABLE_BED);
+    setState(() {
+      totalBeds = count;
+    });
+  }
+
+  void loadRatePerHour() async {
+    var defaultRate = 0.0;
+    BedRate? bedRate = await _bedRateServices.getBedRateById(1);
+
+    if (bedRate == null) {
+      await _bedRateServices.insertRate(
+        BedRate(id: 1, pricePerHour: defaultRate),
+      );
+    }
+
+    setState(() {
+      ratePerHour = bedRate?.pricePerHour ?? defaultRate;
+      _rateController.text = ratePerHour.toStringAsFixed(2);
+    });
+  }
+
+  void saveRatePerHour() async {
+    double newRate = double.tryParse(_rateController.text) ?? ratePerHour;
+
+    int? value = await _bedRateServices.updateBedRate(
+      BedRate(id: 1, pricePerHour: newRate),
+    );
+
+    if (value != null && value >= 1) {
+      setState(() {
+        ratePerHour = newRate;
+        _rateController.text = ratePerHour.toStringAsFixed(2);
+        isRateChanged = false;
+      });
+
+      // Hide keyboard
+      FocusScope.of(context).unfocus();
+
+      SnackBarWidget.show(
+        context,
+        message: 'Rate updated successfully!',
+        color: Colors.green,
+        duration: Duration(seconds: 2),
+      );
+    } else {
+      SnackBarWidget.show(
+        context,
+        message: 'Failed to update rate!',
+        color: Colors.red,
+        duration: Duration(seconds: 2),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
-      body: Center(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SizedBox(height: 20),
+            // Section 1: Rate Per Hour
             Text(
-              'Bed Status',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              'Rate Per Hour',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Card(
-              shadowColor: Colors.amberAccent,
-              elevation: 8,
+              elevation: 6,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                child: Column(
                   children: [
-                    Text(
-                      'Total Beds:  $totalBeds',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                    TextField(
+                      controller: _rateController,
+                      focusNode: _rateFocusNode,
+                      keyboardType: TextInputType.numberWithOptions(
+                        decimal: true,
                       ),
+                      decoration: InputDecoration(
+                        labelText: 'Enter rate per hour',
+                        prefixIcon: Icon(Icons.currency_rupee),
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (value) {
+                        final parsed = double.tryParse(value);
+                        setState(() {
+                          isRateChanged =
+                              parsed != null &&
+                              parsed.toStringAsFixed(2) !=
+                                  ratePerHour.toStringAsFixed(2);
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    Visibility(
+                      visible: isRateChanged,
+                      child: ElevatedButton.icon(
+                        icon: Icon(Icons.save),
+                        label: Text('Save'),
+                        onPressed: saveRatePerHour,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 10),
+            Divider(),
+            const SizedBox(height: 10),
+
+            // Section 2: Bed Status
+            Text(
+              'Bed Status',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Card(
+              elevation: 8,
+              shadowColor: Colors.blueAccent.withOpacity(0.3),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.hotel, color: Colors.deepPurple, size: 30),
+                        SizedBox(width: 10),
+                        Text(
+                          'Total Beds: $totalBeds',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                     IconButton(
                       icon: Icon(
-                        Icons.add,
-                        color: Colors.lightGreenAccent,
-                        size: 30,
+                        Icons.add_circle,
+                        color: Colors.greenAccent.shade400,
+                        size: 32,
                       ),
+                      tooltip: 'Add New Bed',
                       onPressed: () async {
                         var i = await _bedServices.insertBed(
                           Bed(id: totalBeds + 1, status: BedStatus.available),
@@ -88,9 +237,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             color: Colors.green,
                             duration: Duration(seconds: 2),
                           );
-                          setState(() {
-                            getCounts();
-                          });
+                          getCounts();
                         }
                       },
                     ),
@@ -98,180 +245,10 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
             ),
-            SizedBox(height: 20),
-            Text(
-              'Bed Status',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Card(
-              shadowColor: Colors.amberAccent,
-              elevation: 8,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Text(
-                      'Total Beds:  $totalBeds',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.add,
-                        color: Colors.lightGreenAccent,
-                        size: 30,
-                      ),
-                      onPressed: () async {
-                        var i = await _bedServices.insertBed(
-                          Bed(id: totalBeds + 1, status: BedStatus.available),
-                        );
-                        if (i == -1) {
-                          SnackBarWidget.show(
-                            context,
-                            message: 'Failed Save Bed!',
-                            color: Colors.red,
-                            duration: Duration(seconds: 2),
-                          );
-                        } else {
-                          SnackBarWidget.show(
-                            context,
-                            message: 'New Bed Added!',
-                            color: Colors.green,
-                            duration: Duration(seconds: 2),
-                          );
-                          setState(() {
-                            getCounts();
-                          });
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 20),
-            Text(
-              'Bed Status',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Card(
-              shadowColor: Colors.amberAccent,
-              elevation: 8,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Text(
-                      'Total Beds:  $totalBeds',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.add,
-                        color: Colors.lightGreenAccent,
-                        size: 30,
-                      ),
-                      onPressed: () async {
-                        var i = await _bedServices.insertBed(
-                          Bed(id: totalBeds + 1, status: BedStatus.available),
-                        );
-                        if (i == -1) {
-                          SnackBarWidget.show(
-                            context,
-                            message: 'Failed Save Bed!',
-                            color: Colors.red,
-                            duration: Duration(seconds: 2),
-                          );
-                        } else {
-                          SnackBarWidget.show(
-                            context,
-                            message: 'New Bed Added!',
-                            color: Colors.green,
-                            duration: Duration(seconds: 2),
-                          );
-                          setState(() {
-                            getCounts();
-                          });
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 20),
-            Text(
-              'Bed Status',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Card(
-              shadowColor: Colors.amberAccent,
-              elevation: 8,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Text(
-                      'Total Beds:  $totalBeds',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.add,
-                        color: Colors.lightGreenAccent,
-                        size: 30,
-                      ),
-                      onPressed: () async {
-                        var i = await _bedServices.insertBed(
-                          Bed(id: totalBeds + 1, status: BedStatus.available),
-                        );
-                        if (i == -1) {
-                          SnackBarWidget.show(
-                            context,
-                            message: 'Failed Save Bed!',
-                            color: Colors.red,
-                            duration: Duration(seconds: 2),
-                          );
-                        } else {
-                          SnackBarWidget.show(
-                            context,
-                            message: 'New Bed Added!',
-                            color: Colors.green,
-                            duration: Duration(seconds: 2),
-                          );
-                          setState(() {
-                            getCounts();
-                          });
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
+
+            const SizedBox(height: 10),
+            Divider(),
+            const SizedBox(height: 10),
           ],
         ),
       ),
