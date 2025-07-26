@@ -5,9 +5,11 @@ import 'package:urban_rest/constants/databaseConstants.dart';
 import 'package:urban_rest/database/service/bedRateService.dart';
 import 'package:urban_rest/database/service/bedService.dart';
 import 'package:urban_rest/database/service/commonServices.dart';
+import 'package:urban_rest/database/service/transitionService.dart';
 import 'package:urban_rest/model/bed.dart';
 import 'package:urban_rest/model/bedRate.dart';
 import 'package:urban_rest/model/bedStatus.dart';
+import 'package:urban_rest/model/transition.dart';
 import 'package:urban_rest/widgets/snack_bar_widget.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -21,18 +23,22 @@ class _SettingsPageState extends State<SettingsPage> {
   final Commonservices _commonServices = Commonservices();
   final BedService _bedServices = BedService();
   final BedRateservice _bedRateServices = BedRateservice();
+  final Transitionservice _transitionservice = Transitionservice();
 
   int totalBeds = 0;
   double ratePerHour = 0.0;
   final TextEditingController _rateController = TextEditingController();
   final FocusNode _rateFocusNode = FocusNode();
   bool isRateChanged = false;
+  Transition? selectedTransition;
+  List<Transition> transitionList = [];
 
   @override
   void initState() {
     super.initState();
     getCounts();
     loadRatePerHour();
+    getTransitions();
 
     _rateFocusNode.addListener(() {
       if (!_rateFocusNode.hasFocus) {
@@ -110,6 +116,17 @@ class _SettingsPageState extends State<SettingsPage> {
         duration: Duration(seconds: 2),
       );
     }
+  }
+
+  Future<void> getTransitions() async {
+    var list = await _transitionservice.getAllTransitions();
+    print(list);
+    setState(() {
+      transitionList = list;
+      selectedTransition = list.firstWhere(
+        (transition) => transition.isActive == Transition.VALUE_YES,
+      );
+    });
   }
 
   @override
@@ -249,6 +266,43 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 10),
             Divider(),
             const SizedBox(height: 10),
+
+            DropdownButtonFormField<Transition>(
+              decoration: InputDecoration(
+                labelText: 'Transitions',
+                border: OutlineInputBorder(),
+              ),
+              value: selectedTransition,
+              items:
+                  transitionList.map((transition) {
+                    return DropdownMenuItem<Transition>(
+                      value: transition,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            transition.style,
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          if (transition == selectedTransition)
+                            Icon(Icons.check, color: Colors.green, size: 26),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+              onChanged: (Transition? value) async {
+                await _transitionservice.updateTransition(
+                  Transition(
+                    id: value!.id,
+                    style: value.style,
+                    isActive: Transition.VALUE_YES,
+                  ),
+                );
+                setState(() {
+                  selectedTransition = value;
+                });
+              },
+            ),
           ],
         ),
       ),

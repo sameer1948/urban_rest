@@ -31,20 +31,51 @@ class _BedPageState extends State<BedPage> {
     _initBeds();
   }
 
+  // Future<void> _initBeds() async {
+  //   try {
+  //     setState(() => isLoading = true);
+
+  //     final beds = await _bedService.getAllBeds();
+
+  //     final rateById = await _bedRateService.getBedRateById(1);
+
+  //     final availabilityMap = <int, bool>{};
+
+  //     for (var bed in beds) {
+  //       availabilityMap[bed.id] = bed.status == BedStatus.available;
+  //     }
+
+  //     setState(() {
+  //       bedList = beds;
+  //       bedAvailability = availabilityMap;
+  //       rate = rateById?.pricePerHour.toInt() ?? 0;
+  //       isLoading = false;
+  //     });
+  //   } catch (e) {
+  //     setState(() => isLoading = false);
+
+  //     if (context.mounted) {
+  //       ScaffoldMessenger.of(
+  //         context,
+  //       ).showSnackBar(SnackBar(content: Text('Error loading beds: $e')));
+  //     }
+  //   }
+  // }
+
   Future<void> _initBeds() async {
     try {
+      if (!mounted) return;
       setState(() => isLoading = true);
 
       final beds = await _bedService.getAllBeds();
-
       final rateById = await _bedRateService.getBedRateById(1);
 
       final availabilityMap = <int, bool>{};
-
       for (var bed in beds) {
         availabilityMap[bed.id] = bed.status == BedStatus.available;
       }
 
+      if (!mounted) return;
       setState(() {
         bedList = beds;
         bedAvailability = availabilityMap;
@@ -52,13 +83,12 @@ class _BedPageState extends State<BedPage> {
         isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() => isLoading = false);
 
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error loading beds: $e')));
-      }
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error loading beds: $e')));
     }
   }
 

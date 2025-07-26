@@ -2,6 +2,7 @@
 // ignore_for_file: constant_identifier_names
 class DatabaseConstants {
   static const String DATABASE_NAME = 'urban.db';
+  static const String TABLE_TRANSITION = 'TRANSITION';
   static const String TABLE_BED = 'BED';
   static const String TABLE_CUSTOMER = 'CUSTOMER';
   static const String TABLE_BOOKING = 'BOOKING';
@@ -10,6 +11,15 @@ class DatabaseConstants {
 
   /// SQL statement for Total Rows of table Bed.
   static const String SELECT_COUNT_FROM = '''SELECT COUNT(*) FROM ''';
+
+  /// SQL statement to create the transitions table.
+  static const String CREATE_TABLE_TRANSITION = '''
+    CREATE TABLE $TABLE_TRANSITION (
+      id INTEGER PRIMARY KEY AUTOINCREMENT, 
+      style TEXT NOT NULL, 
+      isActive TEXT NOT NULL
+    )
+    ''';
 
   /// SQL statement to create the beds table.
   static const String CREATE_TABLE_BED = '''
