@@ -3,6 +3,7 @@
 class DatabaseConstants {
   static const String DATABASE_NAME = 'urban.db';
   static const String TABLE_TRANSITION = 'TRANSITION';
+  static const String TABLE_DURATION_HOUR = 'DURATION_HOUR';
   static const String TABLE_BED = 'BED';
   static const String TABLE_CUSTOMER = 'CUSTOMER';
   static const String TABLE_BOOKING = 'BOOKING';
@@ -18,6 +19,16 @@ class DatabaseConstants {
       id INTEGER PRIMARY KEY AUTOINCREMENT, 
       style TEXT NOT NULL, 
       isActive TEXT NOT NULL
+    )
+    ''';
+
+  /// SQL statement to create the Duration Hour table.
+  static const String CREATE_TABLE_DURATION_HOUR = '''
+    CREATE TABLE $TABLE_DURATION_HOUR (
+      id INTEGER PRIMARY KEY , 
+      key TEXT NOT NULL, 
+      value TEXT NOT NULL, 
+      status TEXT NOT NULL
     )
     ''';
 

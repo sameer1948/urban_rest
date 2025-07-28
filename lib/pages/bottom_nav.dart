@@ -2,8 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:urban_rest/constants/widgetConstants.dart';
+import 'package:urban_rest/database/service/durationService.dart';
 import 'package:urban_rest/database/service/transitionService.dart';
 import 'package:urban_rest/model/transition.dart';
+import 'package:urban_rest/model/duration_hour.dart';
 import 'package:urban_rest/pages/bed_page.dart';
 import 'package:urban_rest/pages/customer_page.dart';
 import 'package:urban_rest/pages/settings_page.dart';
@@ -19,6 +21,7 @@ class BottomNav extends StatefulWidget {
 
 class _BottomNavState extends State<BottomNav> {
   final Transitionservice _transitionservice = Transitionservice();
+  final DurationHourService _durationHourService = DurationHourService();
   int currentIndex = 0;
   String transitionStyle = 'slide_left';
 
@@ -38,24 +41,14 @@ class _BottomNavState extends State<BottomNav> {
 
   Future<void> loadTransition() async {
     var list = await _transitionservice.getAllTransitions();
-    if (list.isEmpty) {
-      for (int i = 0; i < Widgetconstants.transitionStyles.length; i++) {
-        String style = Widgetconstants.transitionStyles[i];
-        var isActive = i == 1 ? Transition.VALUE_YES : Transition.VALUE_NO;
-        await _transitionservice.insertTransition(
-          Transition(id: i + 1, style: style, isActive: isActive),
-        );
-      }
-      transitionStyle = Widgetconstants.transitionStyles[1];
-    } else {
-      final active = list.firstWhere(
-        (t) => t.isActive == Transition.VALUE_YES,
-        orElse: () => list[0],
-      );
-      setState(() {
-        transitionStyle = active.style;
-      });
-    }
+
+    final active = list.firstWhere(
+      (t) => t.isActive == Transition.VALUE_YES,
+      orElse: () => list[0],
+    );
+    setState(() {
+      transitionStyle = active.style;
+    });
   }
 
   @override

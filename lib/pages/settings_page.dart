@@ -1,14 +1,16 @@
-// ignore_for_file: use_super_parameters, library_private_types_in_public_api, use_build_context_synchronously
+// ignore_for_file: use_super_parameters, library_private_types_in_public_api, use_build_context_synchronously, deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:urban_rest/constants/databaseConstants.dart';
 import 'package:urban_rest/database/service/bedRateService.dart';
 import 'package:urban_rest/database/service/bedService.dart';
-import 'package:urban_rest/database/service/commonServices.dart';
+import 'package:urban_rest/database/service/commonService.dart';
+import 'package:urban_rest/database/service/durationService.dart';
 import 'package:urban_rest/database/service/transitionService.dart';
 import 'package:urban_rest/model/bed.dart';
 import 'package:urban_rest/model/bedRate.dart';
 import 'package:urban_rest/model/bedStatus.dart';
+import 'package:urban_rest/model/duration_hour.dart';
 import 'package:urban_rest/model/transition.dart';
 import 'package:urban_rest/widgets/snack_bar_widget.dart';
 
@@ -20,10 +22,11 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  final Commonservices _commonServices = Commonservices();
-  final BedService _bedServices = BedService();
-  final BedRateservice _bedRateServices = BedRateservice();
+  final Commonservice _commonServices = Commonservice();
   final Transitionservice _transitionservice = Transitionservice();
+  final BedService _bedService = BedService();
+  final BedRateservice _bedRateService = BedRateservice();
+  final DurationHourService _durationHourService = DurationHourService();
 
   int totalBeds = 0;
   double ratePerHour = 0.0;
@@ -32,6 +35,8 @@ class _SettingsPageState extends State<SettingsPage> {
   bool isRateChanged = false;
   Transition? selectedTransition;
   List<Transition> transitionList = [];
+  DurationHour? selectedDurationHour;
+  List<DurationHour> durationHourList = [];
 
   @override
   void initState() {
@@ -39,6 +44,7 @@ class _SettingsPageState extends State<SettingsPage> {
     getCounts();
     loadRatePerHour();
     getTransitions();
+    getDurationHours();
 
     _rateFocusNode.addListener(() {
       if (!_rateFocusNode.hasFocus) {
@@ -71,10 +77,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
   void loadRatePerHour() async {
     var defaultRate = 0.0;
-    BedRate? bedRate = await _bedRateServices.getBedRateById(1);
+    BedRate? bedRate = await _bedRateService.getBedRateById(1);
 
     if (bedRate == null) {
-      await _bedRateServices.insertRate(
+      await _bedRateService.insertRate(
         BedRate(id: 1, pricePerHour: defaultRate),
       );
     }
@@ -88,7 +94,7 @@ class _SettingsPageState extends State<SettingsPage> {
   void saveRatePerHour() async {
     double newRate = double.tryParse(_rateController.text) ?? ratePerHour;
 
-    int? value = await _bedRateServices.updateBedRate(
+    int? value = await _bedRateService.updateBedRate(
       BedRate(id: 1, pricePerHour: newRate),
     );
 
@@ -120,12 +126,18 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> getTransitions() async {
     var list = await _transitionservice.getAllTransitions();
-    print(list);
     setState(() {
       transitionList = list;
       selectedTransition = list.firstWhere(
         (transition) => transition.isActive == Transition.VALUE_YES,
       );
+    });
+  }
+
+  Future<void> getDurationHours() async {
+    var list = await _durationHourService.getDurationHours();
+    setState(() {
+      durationHourList = list;
     });
   }
 
@@ -199,7 +211,94 @@ class _SettingsPageState extends State<SettingsPage> {
             Divider(),
             const SizedBox(height: 10),
 
-            // Section 2: Bed Status
+            // Section 2: Hours Status
+            Text(
+              'Hours Status',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Card(
+              elevation: 8,
+              shadowColor: Colors.blueAccent.withOpacity(0.3),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Row(
+                  children: [
+                    // Dropdown takes most of the space
+                    Expanded(
+                      flex: 2,
+                      child: DropdownButtonFormField<DurationHour>(
+                        decoration: InputDecoration(
+                          labelText: 'Duration Options',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                        ),
+                        value: selectedDurationHour,
+                        items:
+                            durationHourList
+                                .map(
+                                  (durationHour) =>
+                                      DropdownMenuItem<DurationHour>(
+                                        value: durationHour,
+                                        child: Text(durationHour.value),
+                                      ),
+                                )
+                                .toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() {
+                              selectedDurationHour = value;
+                            });
+                          }
+                        },
+                      ),
+                    ),
+
+                    const SizedBox(width: 12),
+                    // Icon buttons aligned to the right
+                    Expanded(
+                      flex: 1,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              Icons.do_disturb_on,
+                              color: Colors.red.shade400,
+                              size: 32,
+                            ),
+                            tooltip: 'Disable',
+                            onPressed: () {},
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              Icons.more_time,
+                              color: Colors.greenAccent.shade400,
+                              size: 32,
+                            ),
+                            tooltip: 'Add',
+                            onPressed: () {},
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Divider(),
+            const SizedBox(height: 10),
+
+            // Section 3: Bed Status
             Text(
               'Bed Status',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -237,7 +336,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                       tooltip: 'Add New Bed',
                       onPressed: () async {
-                        var i = await _bedServices.insertBed(
+                        var i = await _bedService.insertBed(
                           Bed(id: totalBeds + 1, status: BedStatus.available),
                         );
                         if (i == -1) {
@@ -266,7 +365,7 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 10),
             Divider(),
             const SizedBox(height: 10),
-
+            // Section 4 : Transitions
             DropdownButtonFormField<Transition>(
               decoration: InputDecoration(
                 labelText: 'Transitions',
