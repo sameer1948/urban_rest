@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:urban_rest/database/service/bedRateService.dart';
 import 'package:urban_rest/database/service/bookingService.dart';
 import 'package:urban_rest/database/service/customerService.dart';
+import 'package:urban_rest/database/service/durationService.dart';
 import 'package:urban_rest/database/service/invoiceService.dart';
 import 'package:urban_rest/model/booking.dart';
 import 'package:urban_rest/model/customer.dart';
+import 'package:urban_rest/model/duration_hour.dart';
 import 'package:urban_rest/model/invoice.dart';
 import 'package:urban_rest/widgets/timer_card_widget.dart';
 
@@ -19,6 +21,7 @@ class StatusPage extends StatefulWidget {
 
 class _StatusPageState extends State<StatusPage> {
   final CustomerService _customerService = CustomerService();
+  final DurationHourService _durationHourService = DurationHourService();
   final InvoiceService _invoiceservice = InvoiceService();
   List<Customer> customersList = [];
 
@@ -30,20 +33,15 @@ class _StatusPageState extends State<StatusPage> {
   final BedRateservice _bedRateservice = BedRateservice();
   double ratePerHour = 0;
 
-  Map<String, String> durationOptions = {
-    '1': '1 Hour',
-    '2': '2 Hours',
-    '4': '4 Hours',
-    '8': '8 Hours',
-    '12': 'Overnight',
-    '24': 'Day',
-  };
+  List<DurationHour> durationHourList = [];
+  String? selectedDurationKey;
 
   @override
   void initState() {
     super.initState();
     showCustomers();
     showBookings();
+    showDurationHours();
   }
 
   void showCustomers() async {
@@ -66,6 +64,13 @@ class _StatusPageState extends State<StatusPage> {
           bookings
               .where((usage) => usage.endTime.isBefore(DateTime.now()))
               .toList();
+    });
+  }
+
+  Future<void> showDurationHours() async {
+    var list = await _durationHourService.getDurationHours();
+    setState(() {
+      durationHourList = list;
     });
   }
 
@@ -237,12 +242,14 @@ class _StatusPageState extends State<StatusPage> {
                     ),
                     value: selectedDurationKey,
                     items:
-                        durationOptions.entries.map((entry) {
-                          return DropdownMenuItem<String>(
-                            value: entry.key,
-                            child: Text(entry.value),
-                          );
-                        }).toList(),
+                        durationHourList
+                            .map(
+                              (durationHour) => DropdownMenuItem<String>(
+                                value: durationHour.id.toString(),
+                                child: Text(durationHour.value),
+                              ),
+                            )
+                            .toList(),
                     onChanged: (value) {
                       setState(() {
                         selectedDurationKey = value;
@@ -265,14 +272,15 @@ class _StatusPageState extends State<StatusPage> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'Duration extended by ${durationOptions[selectedDurationKey]}.',
+                                'Duration extended by $selectedDurationKey Hours.',
                               ),
                             ),
                           );
                         }
                       } else {
+                        Navigator.of(context).pop();
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('No Chnages Are Made')),
+                          SnackBar(content: Text('Changes are not perfomred')),
                         );
                       }
                       selectedDurationKey = null;

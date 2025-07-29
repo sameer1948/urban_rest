@@ -22,7 +22,7 @@ class _BedPageState extends State<BedPage> {
 
   List<Bed> bedList = [];
   int rate = 0; // Default rate, will be updated after fetching from DB
-  Map<int, bool> bedAvailability = {}; // Available is true, occupied is false
+  //Map<int, bool> bedAvailability = {}; // Available is true, occupied is false
   bool isLoading = true;
 
   @override
@@ -70,15 +70,15 @@ class _BedPageState extends State<BedPage> {
       final beds = await _bedService.getAllBeds();
       final rateById = await _bedRateService.getBedRateById(1);
 
-      final availabilityMap = <int, bool>{};
-      for (var bed in beds) {
-        availabilityMap[bed.id] = bed.status == BedStatus.available;
-      }
+      // final availabilityMap = <int, bool>{};
+      // for (var bed in beds) {
+      //   availabilityMap[bed.id] = bed.status == BedStatus.available;
+      // }
 
       if (!mounted) return;
       setState(() {
         bedList = beds;
-        bedAvailability = availabilityMap;
+        //bedAvailability = availabilityMap;
         rate = rateById?.pricePerHour.toInt() ?? 0;
         isLoading = false;
       });
@@ -131,7 +131,8 @@ class _BedPageState extends State<BedPage> {
                                         highlightColor: Colors.green
                                             .withOpacity(0.2),
                                         onTap: () async {
-                                          if (bedAvailability[bed.id] == true) {
+                                          if (bed.status ==
+                                              BedStatus.available) {
                                             await showDialog(
                                               context: context,
                                               builder:
@@ -157,7 +158,7 @@ class _BedPageState extends State<BedPage> {
                                           padding: const EdgeInsets.all(8.0),
                                           child: BedWidget.getBedIcon(
                                             Widgetconstants.BED_ICON,
-                                            bedAvailability[bed.id] == true
+                                            bed.status == BedStatus.available
                                                 ? Colors.green
                                                 : Colors.red,
                                             50,

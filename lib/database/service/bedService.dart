@@ -50,6 +50,17 @@ class BedService {
     }
   }
 
+  /// Update a Bed
+  Future<int?> updateBed(Bed bed) async {
+    final db = await DatabaseHelper().database;
+    return await db.update(
+      DatabaseConstants.TABLE_BED,
+      bed.toJson(),
+      where: 'id = ?',
+      whereArgs: [bed.id],
+    );
+  }
+
   /// Delete a bed by ID
   Future<void> deleteBed(int id) async {
     final db = await DatabaseHelper().database;

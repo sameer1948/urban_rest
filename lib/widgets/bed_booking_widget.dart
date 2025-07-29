@@ -2,11 +2,15 @@
 
 import 'package:flutter/material.dart';
 import 'package:urban_rest/constants/widgetConstants.dart';
+import 'package:urban_rest/database/service/bedService.dart';
 import 'package:urban_rest/database/service/bookingService.dart';
 import 'package:urban_rest/database/service/customerService.dart';
+import 'package:urban_rest/database/service/durationService.dart';
 import 'package:urban_rest/model/bed.dart';
+import 'package:urban_rest/model/bedStatus.dart';
 import 'package:urban_rest/model/booking.dart';
 import 'package:urban_rest/model/customer.dart';
+import 'package:urban_rest/model/duration_hour.dart';
 import 'package:urban_rest/widgets/snack_bar_widget.dart';
 
 class BedBookingWidget extends StatefulWidget {
@@ -19,19 +23,13 @@ class BedBookingWidget extends StatefulWidget {
 }
 
 class _BedBookingWidgetState extends State<BedBookingWidget> {
+  final BedService _bedService = BedService();
   final Bookingservice _bookingservice = Bookingservice();
+  final DurationHourService _durationHourService = DurationHourService();
   final CustomerService _customerService = CustomerService();
   List<Customer> customerList = [];
   Customer? selectedCustomer;
-
-  Map<String, String> durationOptions = {
-    '1': '1 Hour',
-    '2': '2 Hours',
-    '4': '4 Hours',
-    '8': '8 Hours',
-    '12': 'Overnight',
-    '24': 'Day',
-  };
+  List<DurationHour> durationHourList = [];
   String? selectedDurationKey;
 
   @override
@@ -39,12 +37,20 @@ class _BedBookingWidgetState extends State<BedBookingWidget> {
     super.initState();
     selectedDurationKey = '1'; // Default to 1 Hour
     showCustomers(); // Load customers when dialog is initialized
+    showDurationHours();
   }
 
-  void showCustomers() async {
+  Future<void> showCustomers() async {
     var allCustomers = await _customerService.getAllCustomers();
     setState(() {
       customerList = allCustomers;
+    });
+  }
+
+  Future<void> showDurationHours() async {
+    var list = await _durationHourService.getDurationHours();
+    setState(() {
+      durationHourList = list;
     });
   }
 
@@ -112,12 +118,17 @@ class _BedBookingWidgetState extends State<BedBookingWidget> {
                                 ),
                                 value: selectedDurationKey,
                                 items:
-                                    durationOptions.entries.map((entry) {
-                                      return DropdownMenuItem<String>(
-                                        value: entry.key,
-                                        child: Text(entry.value),
-                                      );
-                                    }).toList(),
+                                    durationHourList
+                                        .map(
+                                          (durationHour) =>
+                                              DropdownMenuItem<String>(
+                                                value:
+                                                    durationHour.id.toString(),
+                                                child: Text(durationHour.value),
+                                              ),
+                                        )
+                                        .toList(),
+
                                 onChanged: (value) {
                                   setState(() {
                                     selectedDurationKey = value;
@@ -143,9 +154,7 @@ class _BedBookingWidgetState extends State<BedBookingWidget> {
                                     Text(
                                       '👤 Customer: ${selectedCustomer!.name}',
                                     ),
-                                    Text(
-                                      '⏳ Duration: ${durationOptions[selectedDurationKey!]}',
-                                    ),
+                                    Text('⏳ Duration: $selectedDurationKey!'),
                                     SizedBox(height: 20),
                                   ],
                                 ),
@@ -168,6 +177,12 @@ class _BedBookingWidgetState extends State<BedBookingWidget> {
                                         endTime: DateTime.now().add(
                                           Duration(hours: hours),
                                         ),
+                                      ),
+                                    );
+                                    await _bedService.updateBed(
+                                      Bed(
+                                        id: widget.bed.id,
+                                        status: BedStatus.occupied,
                                       ),
                                     );
                                     Navigator.of(context).pop();
