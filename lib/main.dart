@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:urban_rest/constants/widgetConstants.dart';
 import 'package:urban_rest/database/service/durationService.dart';
@@ -6,11 +7,19 @@ import 'package:urban_rest/database/service/transitionService.dart';
 import 'package:urban_rest/model/duration_hour.dart';
 import 'package:urban_rest/model/transition.dart';
 import 'package:urban_rest/pages/splash_screen/animation_page.dart';
+import 'package:urban_rest/providers/transition_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeData();
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => TransitionProvider()..load()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

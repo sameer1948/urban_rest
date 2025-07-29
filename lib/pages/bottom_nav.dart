@@ -1,6 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api, use_super_parameters
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:urban_rest/database/service/transitionService.dart';
 import 'package:urban_rest/model/transition.dart';
 import 'package:urban_rest/pages/bed_page.dart';
@@ -8,6 +9,7 @@ import 'package:urban_rest/pages/customer_page.dart';
 import 'package:urban_rest/pages/settings_page.dart';
 import 'package:urban_rest/pages/bill_page.dart';
 import 'package:urban_rest/pages/status_page.dart';
+import 'package:urban_rest/providers/transition_provider.dart';
 
 class BottomNav extends StatefulWidget {
   const BottomNav({Key? key}) : super(key: key);
@@ -17,9 +19,7 @@ class BottomNav extends StatefulWidget {
 }
 
 class _BottomNavState extends State<BottomNav> {
-  final Transitionservice _transitionservice = Transitionservice();
   int currentIndex = 0;
-  String transitionStyle = 'slide_left';
 
   final List<Widget> pages = [
     BedPage(),
@@ -32,23 +32,12 @@ class _BottomNavState extends State<BottomNav> {
   @override
   void initState() {
     super.initState();
-    loadTransition();
-  }
-
-  Future<void> loadTransition() async {
-    var list = await _transitionservice.getAllTransitions();
-
-    final active = list.firstWhere(
-      (t) => t.isActive == Transition.VALUE_YES,
-      orElse: () => list[0],
-    );
-    setState(() {
-      transitionStyle = active.style;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final transitionProvider = Provider.of<TransitionProvider>(context);
+    final transitionStyle = transitionProvider.activeStyle;
     return Scaffold(
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 400),

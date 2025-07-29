@@ -1,6 +1,7 @@
 // ignore_for_file: use_super_parameters, library_private_types_in_public_api, use_build_context_synchronously, deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:urban_rest/constants/databaseConstants.dart';
 import 'package:urban_rest/database/service/bedRateService.dart';
 import 'package:urban_rest/database/service/bedService.dart';
@@ -12,6 +13,7 @@ import 'package:urban_rest/model/bedRate.dart';
 import 'package:urban_rest/model/bedStatus.dart';
 import 'package:urban_rest/model/duration_hour.dart';
 import 'package:urban_rest/model/transition.dart';
+import 'package:urban_rest/providers/transition_provider.dart';
 import 'package:urban_rest/widgets/snack_bar_widget.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -390,7 +392,12 @@ class _SettingsPageState extends State<SettingsPage> {
                     );
                   }).toList(),
               onChanged: (Transition? value) async {
-                await _transitionservice.updateTransition(
+                final transitionProvider = Provider.of<TransitionProvider>(
+                  context,
+                  listen: false,
+                );
+
+                await transitionProvider.update(
                   Transition(
                     id: value!.id,
                     style: value.style,
