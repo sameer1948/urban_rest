@@ -28,7 +28,7 @@ class TimerCardWidget extends StatefulWidget {
 }
 
 class _TimerCardWidgetState extends State<TimerCardWidget> {
-  late Timer _timer;
+  Timer? _timer;
   Duration _timeLeft = Duration.zero;
   double _progress = 0.0;
 
@@ -65,7 +65,7 @@ class _TimerCardWidgetState extends State<TimerCardWidget> {
 
         // Check if time is up and perform the action
         if (_timeLeft <= Duration.zero) {
-          _timer.cancel(); // Stop the timer
+          _timer?.cancel();
           widget.onEnd(); // Trigger the end callback
         }
       });
@@ -81,7 +81,7 @@ class _TimerCardWidgetState extends State<TimerCardWidget> {
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 
