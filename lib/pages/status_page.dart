@@ -2,10 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:urban_rest/database/service/bedRateService.dart';
+import 'package:urban_rest/database/service/bedService.dart';
 import 'package:urban_rest/database/service/bookingService.dart';
 import 'package:urban_rest/database/service/customerService.dart';
 import 'package:urban_rest/database/service/durationService.dart';
 import 'package:urban_rest/database/service/invoiceService.dart';
+import 'package:urban_rest/model/bed.dart';
+import 'package:urban_rest/model/bedStatus.dart';
 import 'package:urban_rest/model/booking.dart';
 import 'package:urban_rest/model/customer.dart';
 import 'package:urban_rest/model/duration_hour.dart';
@@ -20,6 +23,7 @@ class StatusPage extends StatefulWidget {
 }
 
 class _StatusPageState extends State<StatusPage> {
+  final BedService _bedService = BedService();
   final CustomerService _customerService = CustomerService();
   final DurationHourService _durationHourService = DurationHourService();
   final InvoiceService _invoiceservice = InvoiceService();
@@ -129,6 +133,9 @@ class _StatusPageState extends State<StatusPage> {
                       await _bookingservice.updateEndTime(
                         item.id,
                         DateTime.now(),
+                      );
+                      await _bedService.updateBed(
+                        Bed(id: item.bedId, status: BedStatus.available),
                       );
                       showBookings();
                     },
