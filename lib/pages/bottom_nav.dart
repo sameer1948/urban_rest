@@ -1,11 +1,8 @@
 // ignore_for_file: library_private_types_in_public_api, use_super_parameters
 
 import 'package:flutter/material.dart';
-import 'package:urban_rest/constants/widgetConstants.dart';
-import 'package:urban_rest/database/service/durationService.dart';
 import 'package:urban_rest/database/service/transitionService.dart';
 import 'package:urban_rest/model/transition.dart';
-import 'package:urban_rest/model/duration_hour.dart';
 import 'package:urban_rest/pages/bed_page.dart';
 import 'package:urban_rest/pages/customer_page.dart';
 import 'package:urban_rest/pages/settings_page.dart';
@@ -21,7 +18,6 @@ class BottomNav extends StatefulWidget {
 
 class _BottomNavState extends State<BottomNav> {
   final Transitionservice _transitionservice = Transitionservice();
-  final DurationHourService _durationHourService = DurationHourService();
   int currentIndex = 0;
   String transitionStyle = 'slide_left';
 
