@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_import, unintended_html_in_doc_comment
+
 import 'dart:math';
 import 'dart:ui';
 
@@ -28,5 +30,13 @@ class CommonWidgets {
       edgeOffset: 50,
       child: child,
     );
+  }
+
+  /// Converts a comma-separated string of hex color values into a List<Color>.
+  static List<Color> getColors(String colors) {
+    return colors
+        .split(',')
+        .map((hex) => Color(int.parse(hex.trim())))
+        .toList();
   }
 }

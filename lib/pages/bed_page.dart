@@ -1,11 +1,13 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:urban_rest/constants/widgetConstants.dart';
 import 'package:urban_rest/database/service/bedRateService.dart';
 import 'package:urban_rest/database/service/bedService.dart';
 import 'package:urban_rest/model/bed.dart';
 import 'package:urban_rest/model/bedStatus.dart';
+import 'package:urban_rest/providers/backGroundColorProvider.dart';
 import 'package:urban_rest/widgets/bed_booking_widget.dart';
 import 'package:urban_rest/widgets/bed_widget.dart';
 
@@ -94,6 +96,11 @@ class _BedPageState extends State<BedPage> {
 
   @override
   Widget build(BuildContext context) {
+    final backgroundColorProvider = Provider.of<Backgroundcolorprovider>(
+      context,
+    );
+    final selectedBackGroundColor =
+        backgroundColorProvider.activeBackgroundColor;
     return Scaffold(
       appBar: AppBar(title: const Text('Available Beds')),
       body:

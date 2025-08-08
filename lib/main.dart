@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:urban_rest/constants/widgetConstants.dart';
+import 'package:urban_rest/database/service/backgroundColorService.dart';
 import 'package:urban_rest/database/service/durationService.dart';
 import 'package:urban_rest/database/service/transitionService.dart';
+import 'package:urban_rest/model/background_color.dart';
 import 'package:urban_rest/model/duration_hour.dart';
 import 'package:urban_rest/model/transition.dart';
 import 'package:urban_rest/pages/splash_screen/animation_page.dart';
+import 'package:urban_rest/providers/backGroundColorProvider.dart';
 import 'package:urban_rest/providers/transition_provider.dart';
 
 Future<void> main() async {
@@ -16,6 +19,9 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => TransitionProvider()..load()),
+        ChangeNotifierProvider(
+          create: (_) => Backgroundcolorprovider()..load(),
+        ),
       ],
       child: const MyApp(),
     ),
@@ -42,6 +48,7 @@ Future<void> initializeData() async {
 
   await initializeDurationHours(prefs);
   await initializeTransitions(prefs);
+  await initializeBackgroundColors(prefs);
 }
 
 Future<void> initializeDurationHours(SharedPreferences prefs) async {
@@ -82,6 +89,40 @@ Future<void> initializeTransitions(SharedPreferences prefs) async {
           id: i + 1,
           style: Widgetconstants.transitionStyles[i],
           isActive: i == 1 ? Transition.VALUE_YES : Transition.VALUE_NO,
+        ),
+      );
+    }
+  }
+
+  await prefs.setBool(key, true);
+}
+
+Future<void> initializeBackgroundColors(SharedPreferences prefs) async {
+  const key = 'background_colors_initialized';
+  if (prefs.getBool(key) == true) return;
+
+  final service = Backgroundcolorservice();
+  final existing = await service.getBackgroundColors();
+
+  if (existing.isEmpty) {
+    int id = 1;
+    for (var entry in Widgetconstants.backgroundColors.entries) {
+      if (id == 1) {
+        await service.insertBackgroundColor(
+          BackgroundColor(
+            id: id++,
+            key: entry.key,
+            colorsList: entry.value,
+            isActive: BackgroundColor.VALUE_YES,
+          ),
+        );
+      }
+      await service.insertBackgroundColor(
+        BackgroundColor(
+          id: id++,
+          key: entry.key,
+          colorsList: entry.value,
+          isActive: BackgroundColor.VALUE_NO,
         ),
       );
     }

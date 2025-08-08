@@ -52,6 +52,7 @@ class DatabaseHelper {
   // Create tables when the database is created for the first time
   Future<void> _onCreate(Database db, int version) async {
     try {
+      await db.execute(DatabaseConstants.CREATE_TABLE_BACKGROUND_COLOR);
       await db.execute(DatabaseConstants.CREATE_TABLE_DURATION_HOUR);
       await db.execute(DatabaseConstants.CREATE_TABLE_TRANSITION);
       await db.execute(DatabaseConstants.CREATE_TABLE_BED);
