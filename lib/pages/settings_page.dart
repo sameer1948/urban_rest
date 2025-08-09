@@ -165,11 +165,15 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.zero,
         child: Container(
+          width: screenWidth,
+          height: screenHeight,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: CommonWidgets.getColors(
@@ -182,19 +186,22 @@ class _SettingsPageState extends State<SettingsPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const SizedBox(height: 10),
               // Section 1: Rate Per Hour
               Text(
-                'Rate Per Hour',
+                '   Rate Per Hour',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               Card(
                 elevation: 6,
+                color: Colors.transparent,
+                shadowColor: Colors.transparent,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
                   child: Column(
                     children: [
                       TextField(
@@ -239,24 +246,23 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
 
-              const SizedBox(height: 10),
               Divider(),
-              const SizedBox(height: 10),
 
               // Section 2: Hours Status
               Text(
-                'Hours Status',
+                '   Hours Status',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               Card(
                 elevation: 8,
-                shadowColor: Colors.blueAccent.withOpacity(0.3),
+                color: Colors.transparent,
+                shadowColor: Colors.transparent,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
                   child: Row(
                     children: [
                       // Dropdown takes most of the space
@@ -326,24 +332,24 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+
               Divider(),
-              const SizedBox(height: 10),
 
               // Section 3: Bed Status
               Text(
-                'Bed Status',
+                '   Bed Status',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
               Card(
                 elevation: 8,
-                shadowColor: Colors.blueAccent.withOpacity(0.3),
+                color: Colors.transparent,
+                shadowColor: Colors.transparent,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -394,50 +400,57 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
 
-              const SizedBox(height: 10),
               Divider(),
               const SizedBox(height: 10),
-              // Section 4 : Transitions
-              DropdownButtonFormField<Transition>(
-                decoration: InputDecoration(
-                  labelText: 'Transitions',
-                  border: OutlineInputBorder(),
-                ),
-                value: selectedTransition,
-                items:
-                    transitionList.map((transition) {
-                      return DropdownMenuItem<Transition>(
-                        value: transition,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              transition.style,
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            if (transition == selectedTransition)
-                              Icon(Icons.check, color: Colors.green, size: 26),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                onChanged: (Transition? value) async {
-                  final transitionProvider = Provider.of<TransitionProvider>(
-                    context,
-                    listen: false,
-                  );
 
-                  await transitionProvider.update(
-                    Transition(
-                      id: value!.id,
-                      style: value.style,
-                      isActive: Transition.VALUE_YES,
-                    ),
-                  );
-                  setState(() {
-                    selectedTransition = value;
-                  });
-                },
+              // Section 4 : Transitions
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: DropdownButtonFormField<Transition>(
+                  decoration: InputDecoration(
+                    labelText: 'Transitions',
+                    border: OutlineInputBorder(),
+                  ),
+                  value: selectedTransition,
+                  items:
+                      transitionList.map((transition) {
+                        return DropdownMenuItem<Transition>(
+                          value: transition,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                transition.style,
+                                style: TextStyle(fontSize: 16),
+                              ),
+                              if (transition == selectedTransition)
+                                Icon(
+                                  Icons.check,
+                                  color: Colors.green,
+                                  size: 26,
+                                ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                  onChanged: (Transition? value) async {
+                    final transitionProvider = Provider.of<TransitionProvider>(
+                      context,
+                      listen: false,
+                    );
+
+                    await transitionProvider.update(
+                      Transition(
+                        id: value!.id,
+                        style: value.style,
+                        isActive: Transition.VALUE_YES,
+                      ),
+                    );
+                    setState(() {
+                      selectedTransition = value;
+                    });
+                  },
+                ),
               ),
 
               const SizedBox(height: 10),
@@ -445,49 +458,60 @@ class _SettingsPageState extends State<SettingsPage> {
               const SizedBox(height: 10),
 
               // Section 5 : Background Color
-              DropdownButtonFormField<BackgroundColor>(
-                decoration: InputDecoration(
-                  labelText: 'Background Color',
-                  border: OutlineInputBorder(),
-                ),
-                value: selectedBackGroundColor,
-                items:
-                    backgroundColorList.map((backGroundcolor) {
-                      return DropdownMenuItem<BackgroundColor>(
-                        value: backGroundcolor,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              backGroundcolor.key,
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            if (backGroundcolor == selectedBackGroundColor)
-                              Icon(Icons.check, color: Colors.green, size: 26),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                onChanged: (BackgroundColor? value) async {
-                  final backgroundcolorprovider =
-                      Provider.of<Backgroundcolorprovider>(
-                        context,
-                        listen: false,
-                      );
+              Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: DropdownButtonFormField<BackgroundColor>(
+                  decoration: InputDecoration(
+                    labelText: 'Background Color',
+                    border: OutlineInputBorder(),
+                  ),
+                  value: selectedBackGroundColor,
+                  items:
+                      backgroundColorList.map((backGroundcolor) {
+                        return DropdownMenuItem<BackgroundColor>(
+                          value: backGroundcolor,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                backGroundcolor.key,
+                                style: TextStyle(fontSize: 16),
+                              ),
+                              if (backGroundcolor == selectedBackGroundColor)
+                                Icon(
+                                  Icons.check,
+                                  color: Colors.green,
+                                  size: 26,
+                                ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                  onChanged: (BackgroundColor? value) async {
+                    final backgroundcolorprovider =
+                        Provider.of<Backgroundcolorprovider>(
+                          context,
+                          listen: false,
+                        );
 
-                  await backgroundcolorprovider.update(
-                    BackgroundColor(
-                      id: value!.id,
-                      key: value.key,
-                      colorsList: value.colorsList,
-                      isActive: BackgroundColor.VALUE_YES,
-                    ),
-                  );
-                  setState(() {
-                    selectedBackGroundColor = value;
-                  });
-                },
+                    await backgroundcolorprovider.update(
+                      BackgroundColor(
+                        id: value!.id,
+                        key: value.key,
+                        colorsList: value.colorsList,
+                        isActive: BackgroundColor.VALUE_YES,
+                      ),
+                    );
+                    setState(() {
+                      selectedBackGroundColor = value;
+                    });
+                  },
+                ),
               ),
+
+              const SizedBox(height: 10),
+              Divider(),
+              const SizedBox(height: 10),
             ],
           ),
         ),
