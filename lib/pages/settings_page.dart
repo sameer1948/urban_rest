@@ -168,7 +168,12 @@ class _SettingsPageState extends State<SettingsPage> {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(
+        title: const Text('Settings'),
+        backgroundColor: CommonWidgets.getTopColors(
+          selectedBackGroundColor?.colorsList ?? '0xFF2193b0',
+        ),
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.zero,
         child: Container(

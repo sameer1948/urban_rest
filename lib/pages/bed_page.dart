@@ -10,6 +10,7 @@ import 'package:urban_rest/model/bedStatus.dart';
 import 'package:urban_rest/providers/backGroundColorProvider.dart';
 import 'package:urban_rest/widgets/bed_booking_widget.dart';
 import 'package:urban_rest/widgets/bed_widget.dart';
+import 'package:urban_rest/widgets/common_widgets.dart';
 
 class BedPage extends StatefulWidget {
   const BedPage({super.key});
@@ -96,100 +97,126 @@ class _BedPageState extends State<BedPage> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
     final backgroundColorProvider = Provider.of<Backgroundcolorprovider>(
       context,
     );
     final selectedBackGroundColor =
         backgroundColorProvider.activeBackgroundColor;
     return Scaffold(
-      appBar: AppBar(title: const Text('Available Beds')),
-      body:
-          isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : RefreshIndicator(
-                onRefresh: _initBeds, // Reload the beds and availability
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Text(
-                        '                      Per Hour Rates: Rs. $rate.0',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.deepOrange,
+      appBar: AppBar(
+        title: const Text('Available Beds'),
+        backgroundColor: CommonWidgets.getTopColors(
+          selectedBackGroundColor?.colorsList ?? '0xFF2193b0',
+        ),
+      ),
+      body: Container(
+        width: screenWidth,
+        height: screenHeight,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: CommonWidgets.getColors(
+              selectedBackGroundColor?.colorsList ?? '0xFF2193b0,0xFF6dd5ed',
+            ),
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child:
+            isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : RefreshIndicator(
+                  onRefresh: _initBeds, // Reload the beds and availability
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Text(
+                          '                      Per Hour Rates: Rs. $rate.0',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.deepOrange,
+                          ),
                         ),
-                      ),
-                      Center(
-                        child: Wrap(
-                          spacing: 20,
-                          runSpacing: 20,
-                          children:
-                              bedList.map((bed) {
-                                return Column(
-                                  children: [
-                                    Material(
-                                      child: InkWell(
-                                        borderRadius: BorderRadius.circular(8),
-                                        splashColor: Colors.green.withOpacity(
-                                          0.5,
-                                        ),
-                                        highlightColor: Colors.green
-                                            .withOpacity(0.2),
-                                        onTap: () async {
-                                          if (bed.status ==
-                                              BedStatus.available) {
-                                            await showDialog(
-                                              context: context,
-                                              builder:
-                                                  (context) => BedBookingWidget(
-                                                    bed: bed,
+                        Center(
+                          child: Wrap(
+                            spacing: 20,
+                            runSpacing: 20,
+                            children:
+                                bedList.map((bed) {
+                                  return Column(
+                                    children: [
+                                      Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          splashColor: Colors.green.withOpacity(
+                                            0.5,
+                                          ),
+                                          highlightColor: Colors.green
+                                              .withOpacity(0.2),
+                                          onTap: () async {
+                                            if (bed.status ==
+                                                BedStatus.available) {
+                                              await showDialog(
+                                                context: context,
+                                                builder:
+                                                    (context) =>
+                                                        BedBookingWidget(
+                                                          bed: bed,
+                                                        ),
+                                              );
+                                              await _initBeds(); // Refresh availability after booking
+                                            } else {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    'Bed ${bed.id} is occupied',
                                                   ),
-                                            );
-                                            await _initBeds(); // Refresh availability after booking
-                                          } else {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                  'Bed ${bed.id} is occupied',
+                                                  duration: Duration(
+                                                    seconds: 2,
+                                                  ),
                                                 ),
-                                                duration: Duration(seconds: 2),
-                                              ),
-                                            );
-                                          }
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: BedWidget.getBedIcon(
-                                            Widgetconstants.BED_ICON,
-                                            bed.status == BedStatus.available
-                                                ? Colors.green
-                                                : Colors.red,
-                                            50,
-                                            50,
+                                              );
+                                            }
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: BedWidget.getBedIcon(
+                                              Widgetconstants.BED_ICON,
+                                              bed.status == BedStatus.available
+                                                  ? Colors.green
+                                                  : Colors.red,
+                                              50,
+                                              50,
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    Text(
-                                      '${bed.id}',
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.bold,
+                                      Text(
+                                        '${bed.id}',
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                );
-                              }).toList(),
+                                    ],
+                                  );
+                                }).toList(),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
+      ),
 
       // floatingActionButton: FloatingActionButton(
       //   onPressed: () async {

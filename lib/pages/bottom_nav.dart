@@ -2,14 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:urban_rest/database/service/transitionService.dart';
-import 'package:urban_rest/model/transition.dart';
 import 'package:urban_rest/pages/bed_page.dart';
 import 'package:urban_rest/pages/customer_page.dart';
 import 'package:urban_rest/pages/settings_page.dart';
 import 'package:urban_rest/pages/bill_page.dart';
 import 'package:urban_rest/pages/status_page.dart';
+import 'package:urban_rest/providers/backGroundColorProvider.dart';
 import 'package:urban_rest/providers/transition_provider.dart';
+import 'package:urban_rest/widgets/common_widgets.dart';
 
 class BottomNav extends StatefulWidget {
   const BottomNav({Key? key}) : super(key: key);
@@ -38,6 +38,11 @@ class _BottomNavState extends State<BottomNav> {
   Widget build(BuildContext context) {
     final transitionProvider = Provider.of<TransitionProvider>(context);
     final transitionStyle = transitionProvider.activeStyle;
+    final backgroundColorProvider = Provider.of<Backgroundcolorprovider>(
+      context,
+    );
+    final selectedBackGroundColor =
+        backgroundColorProvider.activeBackgroundColor;
     return Scaffold(
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 400),
@@ -53,6 +58,10 @@ class _BottomNavState extends State<BottomNav> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
         type: BottomNavigationBarType.fixed,
+        backgroundColor: CommonWidgets.getBottomColors(
+          selectedBackGroundColor?.colorsList ?? '0xFF2193b0',
+        ),
+
         onTap: (index) {
           if (index == currentIndex) return;
           setState(() {

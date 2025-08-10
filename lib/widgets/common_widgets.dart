@@ -39,4 +39,22 @@ class CommonWidgets {
         .map((hex) => Color(int.parse(hex.trim())))
         .toList();
   }
+
+  /// fetching safe Area colors
+  static Color getTopColors(String colors) {
+    return colors
+        .split(',')
+        .map((hex) => Color(int.parse(hex.trim())))
+        .toList()
+        .first;
+  }
+
+  /// fetching Bottom Nav colors
+  static Color getBottomColors(String colors) {
+    return colors
+        .split(',')
+        .map((hex) => Color(int.parse(hex.trim())))
+        .toList()
+        .last;
+  }
 }

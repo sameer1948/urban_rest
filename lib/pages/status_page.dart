@@ -1,6 +1,7 @@
 // ignore_for_file: use_super_parameters, library_private_types_in_public_api, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:urban_rest/database/service/bedRateService.dart';
 import 'package:urban_rest/database/service/bedService.dart';
 import 'package:urban_rest/database/service/bookingService.dart';
@@ -13,6 +14,8 @@ import 'package:urban_rest/model/booking.dart';
 import 'package:urban_rest/model/customer.dart';
 import 'package:urban_rest/model/duration_hour.dart';
 import 'package:urban_rest/model/invoice.dart';
+import 'package:urban_rest/providers/backGroundColorProvider.dart';
+import 'package:urban_rest/widgets/common_widgets.dart';
 import 'package:urban_rest/widgets/timer_card_widget.dart';
 
 class StatusPage extends StatefulWidget {
@@ -85,117 +88,140 @@ class _StatusPageState extends State<StatusPage> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+    final backgroundColorProvider = Provider.of<Backgroundcolorprovider>(
+      context,
+    );
+    final selectedBackGroundColor =
+        backgroundColorProvider.activeBackgroundColor;
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Status'),
+          backgroundColor: CommonWidgets.getTopColors(
+            selectedBackGroundColor?.colorsList ?? '0xFF2193b0',
+          ),
           bottom: const TabBar(
             tabs: [Tab(text: "Occupied"), Tab(text: "Completed")],
           ),
         ),
-        body: TabBarView(
-          children: [
-            // Tab 1: Usages
-            RefreshIndicator(
-              onRefresh: () async {
-                showBookings();
-              },
-              color: Colors.greenAccent,
-              backgroundColor: Colors.white,
-              displacement: 50,
-              edgeOffset: 50,
-              child: ListView.builder(
-                itemCount: occupiedUsagesList.length,
-                itemBuilder: (context, index) {
-                  final item = occupiedUsagesList[index];
-                  return TimerCardWidget(
-                    bedNo: item.bedId.toString(),
-                    customerName: fetchCustomerName(item.customerId),
-                    startTime: item.startTime,
-                    endTime: item.endTime,
-                    onEnd: () async {
-                      // Insert a new Invoice for the completed usage
-                      var invoiceId =
-                          DateTime.now().millisecondsSinceEpoch ~/ 1000;
-                      await _invoiceservice.insertInvoice(
-                        Invoice(
-                          id: invoiceId,
-                          bookingId: item.id,
-                          amount: calculateTotalAmount(
-                            item.startTime,
-                            DateTime.now(),
-                          ),
-                          paymentDate: DateTime.now(),
-                          isPaid: false,
-                        ),
-                      );
-                      await _bookingservice.updateEndTime(
-                        item.id,
-                        DateTime.now(),
-                      );
-                      await _bedService.updateBed(
-                        Bed(id: item.bedId, status: BedStatus.available),
-                      );
-                      showBookings();
-                    },
-                    onExtend: () async {
-                      await showDialog(
-                        context: context,
-                        builder: (context) => getDropdown(item),
-                      );
-                      showBookings();
-                    },
-                  );
-                },
+        body: Container(
+          width: screenWidth,
+          height: screenHeight,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: CommonWidgets.getColors(
+                selectedBackGroundColor?.colorsList ?? '0xFF2193b0,0xFF6dd5ed',
               ),
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-
-            // Tab 2: Customers
-            RefreshIndicator(
-              onRefresh: () async {
-                showBookings();
-              },
-              color: Colors.blue,
-              backgroundColor: Colors.white,
-              displacement: 50,
-              edgeOffset: 50,
-
-              child: ListView.builder(
-                physics: AlwaysScrollableScrollPhysics(),
-                itemCount: completedUsagesList.length,
-                itemBuilder: (context, index) {
-                  final item = completedUsagesList[index];
-                  return TimerCardWidget(
-                    bedNo: item.bedId.toString(),
-                    customerName: fetchCustomerName(item.customerId),
-                    startTime: item.startTime,
-                    endTime: item.endTime,
-                    onEnd: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Session Already ended for ${item.customerId}',
-                          ),
-                          duration: Duration(seconds: 3),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    },
-                    onExtend: () async {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Can\'t Extend ended session'),
-                          duration: Duration(seconds: 3),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    },
-                  );
+          ),
+          child: TabBarView(
+            children: [
+              // Tab 1: Usages
+              RefreshIndicator(
+                onRefresh: () async {
+                  showBookings();
                 },
+                color: Colors.greenAccent,
+                backgroundColor: Colors.white,
+                displacement: 50,
+                edgeOffset: 50,
+                child: ListView.builder(
+                  itemCount: occupiedUsagesList.length,
+                  itemBuilder: (context, index) {
+                    final item = occupiedUsagesList[index];
+                    return TimerCardWidget(
+                      bedNo: item.bedId.toString(),
+                      customerName: fetchCustomerName(item.customerId),
+                      startTime: item.startTime,
+                      endTime: item.endTime,
+                      onEnd: () async {
+                        // Insert a new Invoice for the completed usage
+                        var invoiceId =
+                            DateTime.now().millisecondsSinceEpoch ~/ 1000;
+                        await _invoiceservice.insertInvoice(
+                          Invoice(
+                            id: invoiceId,
+                            bookingId: item.id,
+                            amount: calculateTotalAmount(
+                              item.startTime,
+                              DateTime.now(),
+                            ),
+                            paymentDate: DateTime.now(),
+                            isPaid: false,
+                          ),
+                        );
+                        await _bookingservice.updateEndTime(
+                          item.id,
+                          DateTime.now(),
+                        );
+                        await _bedService.updateBed(
+                          Bed(id: item.bedId, status: BedStatus.available),
+                        );
+                        showBookings();
+                      },
+                      onExtend: () async {
+                        await showDialog(
+                          context: context,
+                          builder: (context) => getDropdown(item),
+                        );
+                        showBookings();
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+
+              // Tab 2: Customers
+              RefreshIndicator(
+                onRefresh: () async {
+                  showBookings();
+                },
+                color: Colors.blue,
+                backgroundColor: Colors.white,
+                displacement: 50,
+                edgeOffset: 50,
+
+                child: ListView.builder(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  itemCount: completedUsagesList.length,
+                  itemBuilder: (context, index) {
+                    final item = completedUsagesList[index];
+                    return TimerCardWidget(
+                      bedNo: item.bedId.toString(),
+                      customerName: fetchCustomerName(item.customerId),
+                      startTime: item.startTime,
+                      endTime: item.endTime,
+                      onEnd: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Session Already ended for ${item.customerId}',
+                            ),
+                            duration: Duration(seconds: 3),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      },
+                      onExtend: () async {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Can\'t Extend ended session'),
+                            duration: Duration(seconds: 3),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
