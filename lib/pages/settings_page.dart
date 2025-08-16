@@ -251,7 +251,12 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
 
-              Divider(),
+              Divider(
+                color: CommonWidgets.getBottomColors(
+                  selectedBackGroundColor?.colorsList ?? '0xFF2193b0',
+                ),
+                thickness: 2.0,
+              ),
 
               // Section 2: Hours Status
               Text(
@@ -338,7 +343,13 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
 
-              Divider(),
+              const SizedBox(height: 10),
+              Divider(
+                color: CommonWidgets.getBottomColors(
+                  selectedBackGroundColor?.colorsList ?? '0xFF2193b0',
+                ),
+                thickness: 2.0,
+              ),
 
               // Section 3: Bed Status
               Text(
@@ -405,7 +416,12 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
 
-              Divider(),
+              Divider(
+                color: CommonWidgets.getBottomColors(
+                  selectedBackGroundColor?.colorsList ?? '0xFF2193b0',
+                ),
+                thickness: 2.0,
+              ),
               const SizedBox(height: 10),
 
               // Section 4 : Transitions
@@ -414,9 +430,19 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: DropdownButtonFormField<Transition>(
                   decoration: InputDecoration(
                     labelText: 'Transitions',
-                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.swap_horiz),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
                   value: selectedTransition,
+                  isExpanded: true,
+                  icon: const Icon(Icons.arrow_drop_down),
+                  dropdownColor: Colors.white,
                   items:
                       transitionList.map((transition) {
                         return DropdownMenuItem<Transition>(
@@ -424,21 +450,25 @@ class _SettingsPageState extends State<SettingsPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                transition.style,
-                                style: TextStyle(fontSize: 16),
+                              Expanded(
+                                child: Text(
+                                  transition.style,
+                                  style: const TextStyle(fontSize: 16),
+                                ),
                               ),
                               if (transition == selectedTransition)
-                                Icon(
+                                const Icon(
                                   Icons.check,
                                   color: Colors.green,
-                                  size: 26,
+                                  size: 24,
                                 ),
                             ],
                           ),
                         );
                       }).toList(),
                   onChanged: (Transition? value) async {
+                    if (value == null || value == selectedTransition) return;
+
                     final transitionProvider = Provider.of<TransitionProvider>(
                       context,
                       listen: false,
@@ -446,11 +476,12 @@ class _SettingsPageState extends State<SettingsPage> {
 
                     await transitionProvider.update(
                       Transition(
-                        id: value!.id,
+                        id: value.id,
                         style: value.style,
                         isActive: Transition.VALUE_YES,
                       ),
                     );
+
                     setState(() {
                       selectedTransition = value;
                     });
@@ -459,7 +490,12 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
 
               const SizedBox(height: 10),
-              Divider(),
+              Divider(
+                color: CommonWidgets.getTopColors(
+                  selectedBackGroundColor?.colorsList ?? '0xFF2193b0',
+                ),
+                thickness: 2.0,
+              ),
               const SizedBox(height: 10),
 
               // Section 5 : Background Color
@@ -468,31 +504,65 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: DropdownButtonFormField<BackgroundColor>(
                   decoration: InputDecoration(
                     labelText: 'Background Color',
-                    border: OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.color_lens),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
                   value: selectedBackGroundColor,
+                  isExpanded: true,
+                  icon: const Icon(Icons.arrow_drop_down),
+                  dropdownColor: Colors.white,
                   items:
                       backgroundColorList.map((backGroundcolor) {
                         return DropdownMenuItem<BackgroundColor>(
                           value: backGroundcolor,
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                backGroundcolor.key,
-                                style: TextStyle(fontSize: 16),
+                              // Color circle preview
+                              Container(
+                                width: 16,
+                                height: 16,
+                                margin: const EdgeInsets.only(right: 10),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: LinearGradient(
+                                    colors: CommonWidgets.getColors(
+                                      backGroundcolor.colorsList,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              // Flexible text label
+                              Expanded(
+                                child: Text(
+                                  backGroundcolor.key,
+                                  style: const TextStyle(fontSize: 16),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                               if (backGroundcolor == selectedBackGroundColor)
-                                Icon(
-                                  Icons.check,
-                                  color: Colors.green,
-                                  size: 26,
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 10),
+                                  child: Icon(
+                                    Icons.check,
+                                    color: Colors.green,
+                                    size: 22,
+                                  ),
                                 ),
                             ],
                           ),
                         );
                       }).toList(),
                   onChanged: (BackgroundColor? value) async {
+                    if (value == null || value == selectedBackGroundColor) {
+                      return;
+                    }
+
                     final backgroundcolorprovider =
                         Provider.of<Backgroundcolorprovider>(
                           context,
@@ -501,12 +571,13 @@ class _SettingsPageState extends State<SettingsPage> {
 
                     await backgroundcolorprovider.update(
                       BackgroundColor(
-                        id: value!.id,
+                        id: value.id,
                         key: value.key,
                         colorsList: value.colorsList,
                         isActive: BackgroundColor.VALUE_YES,
                       ),
                     );
+
                     setState(() {
                       selectedBackGroundColor = value;
                     });
@@ -515,7 +586,12 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
 
               const SizedBox(height: 10),
-              Divider(),
+              Divider(
+                color: CommonWidgets.getTopColors(
+                  selectedBackGroundColor?.colorsList ?? '0xFF2193b0',
+                ),
+                thickness: 2.0,
+              ),
               const SizedBox(height: 10),
             ],
           ),
