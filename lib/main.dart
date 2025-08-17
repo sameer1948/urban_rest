@@ -107,25 +107,18 @@ Future<void> initializeBackgroundColors(SharedPreferences prefs) async {
 
   if (existing.isEmpty) {
     int id = 1;
+    bool first = true;
     for (var entry in Widgetconstants.backgroundColors.entries) {
-      if (id == 1) {
-        await service.insertBackgroundColor(
-          BackgroundColor(
-            id: id++,
-            key: entry.key,
-            colorsList: entry.value,
-            isActive: BackgroundColor.VALUE_YES,
-          ),
-        );
-      }
       await service.insertBackgroundColor(
         BackgroundColor(
           id: id++,
           key: entry.key,
           colorsList: entry.value,
-          isActive: BackgroundColor.VALUE_NO,
+          isActive:
+              first ? BackgroundColor.VALUE_YES : BackgroundColor.VALUE_NO,
         ),
       );
+      first = false;
     }
   }
 
